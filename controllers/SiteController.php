@@ -200,10 +200,11 @@ class SiteController extends Controller
      */
   public function actionCart()
   {
-     if (Yii::$app->request->post('id') !== null && Yii::$app->request->post('id') > 0) {
-       $session = yii::$app->session;
+    $session = yii::$app->session;
        $id = $session["cart"];
        $qt = $session["qt"];
+    
+     if (Yii::$app->request->post('id') !== null && Yii::$app->request->post('id') > 0) {
        if (!is_array($id) && $id !== null) $id[0] = $id; // make array
        
        if ( $id == null || !in_array(Yii::$app->request->post('id'),$id)) // is product is already added
@@ -220,11 +221,10 @@ class SiteController extends Controller
          $qt[$key] = $qt[$key] + Yii::$app->request->post('quantity');
          $session["qt"] = $qt;
        }
-
-       $product =Products::findAll($id);
-       return $this->render('cart',['modal'=>$product, 'qt'=>$qt]);
        
      }
+    $product =Products::findAll($id);
+    return $this->render('cart',['modal'=>$product, 'qt'=>$qt]);
   }
   /**
      * Save product to cart. An show the csrt

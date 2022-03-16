@@ -21,9 +21,11 @@ use yii\helpers\Url;
         </div>
 <?
         
-        $i = 0;
+        $i = $total = 0;
         foreach ($modal as $cart) 
     {
+          
+          $total += $qt[$i]*$cart->unit_price;
         ?>  
         <div class="card rounded-3 mb-4">
           <div class="card-body p-4">
@@ -60,7 +62,12 @@ use yii\helpers\Url;
         </div>
 <?
         ++$i;}?>
-
+        <div class="card">
+          <div class="card-body">
+            <?=$total?>
+          </div>
+        </div>
+        
         <div class="card">
           <div class="card-body">
             <button type="button" class="btn btn-warning btn-block btn-lg">Proceed to Pay</button>
