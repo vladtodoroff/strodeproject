@@ -12,6 +12,8 @@ use app\models\SignupForm;
 use app\models\User;
 use app\models\ContactForm;
 use app\models\Products;
+use app\models\Orders;
+use app\models\OrderItems;
 
 
 class SiteController extends Controller
@@ -200,6 +202,7 @@ class SiteController extends Controller
      */
   public function actionCart()
   {
+
     $session = yii::$app->session;
        $id = $session["cart"];
        $qt = $session["qt"];
@@ -223,7 +226,7 @@ class SiteController extends Controller
        }
        
      }
-    $product =Products::findAll($id);
+    $product = Products::findAll($id);
     return $this->render('cart',['modal'=>$product, 'qt'=>$qt]);
   }
   /**
@@ -233,11 +236,89 @@ class SiteController extends Controller
      */
   public function actionClearcart()
   {
-    $session = yii::$app->session;
+    // Should be access if you are not guest  (ref. ActionCart)
+    // add remove one product only. The action button should be js the same as -+quantity
+    // this fuction should be except $_POST["id"] and if isset make a array loop for all ID's and remove the one need to be removed after that remove the same element from quantity array
+    // and finish with "
+    // $product = Products::findAll($id);
+    // return $this->render('cart',['modal'=>$product, 'qt'=>$qt]);
+    $session = yii::$app->session;    
     $session->remove("cart");
     $session->remove("qt");
     
     return $this->render('cart');
+  }
+  
+  /**
+  * Update quantity in cart and save in session
+  *
+  * @return Response
+  */
+  
+  public function actionCartaction()
+  {
+    // Should be access if you are not guest  (ref. ActionCart)
+    $session = yii::$app->session;
+    
+    if (isset($_POST["id"]) && isset($_POST["qt"])) {
+      $id = json_decode(($_POST["id"]));
+      $qt = json_decode(($_POST["qt"]));
+      $qt[1] = 2;
+      $session["cart"] = $id;
+      $session["qt"] = $qt;  
+    } else {
+      $id = $session["cart"];
+      $qt = $session["qt"];
+    }
+    
+    
+    $product = Products::findAll($id);
+    return $this->renderPartial('cart',['modal'=>$product, 'qt'=>$qt]);
+  }
+  
+  /**
+  * Checkout
+  *
+  * @return Response
+  */
+  public function actionCheckout()
+  {
+    // Should be access if you are not guest  (ref. ActionCart)
+    // You should see if $id and $qt are not empty before processing with Orders
+    $session = yii::$app->session;
+    $id = $session["cart"];
+    $qt = $session["qt"];
+    $product = Products::findAll($id);
+
+    $orders = new Orders();
+    $orders->customer_id = Yii::$app->user->identity->id;
+    $orders->order_date = date("Y-m-d");
+    $orders->save();
+    
+    $idorder = $orders->getPrimaryKey(); // Id of last inserted order
+    
+    
+    $order = new OrderItems();
+    $i = 0;
+    foreach ($id as $pid)
+    {
+      $product = Products::findOne($pid);
+      $order = new OrderItems();
+      $order->order_id = $idorder;
+      $order->product_id = $pid;
+      $order->quantity = $qt[$i];
+      $order->unit_price = $product->unit_price;
+      $order->save();
+      ++$i;
+    }
+
+    $session->remove("cart");
+    $session->remove("qt");
+    
+
+    
+    return $this->render('checkout', ['ordernumber'=>$idorder]);
+    
   }
   
   

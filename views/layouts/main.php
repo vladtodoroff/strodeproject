@@ -11,6 +11,8 @@ use yii\bootstrap4\Nav;
 use yii\bootstrap4\NavBar;
 
 AppAsset::register($this);
+
+Yii::$app->name = "Strode Store";
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>
@@ -27,6 +29,11 @@ AppAsset::register($this);
 <?#=@$_SERVER['REMOTE_ADDR']?>
 <header>
     <?php
+  $cart = "";
+$session = yii::$app->session;
+if ($session['cart'] !== null && is_array($session['cart']) )  $cart = '(' . count($session['cart']).')';
+
+  
     NavBar::begin([
         'brandLabel' => Yii::$app->name,
         'brandUrl' => Yii::$app->homeUrl,
@@ -34,6 +41,7 @@ AppAsset::register($this);
             'class' => 'navbar navbar-expand-md navbar-dark bg-dark fixed-top',
         ],
     ]);
+
 
     echo Nav::widget([
         'options' => ['class' => 'navbar-nav'],
@@ -61,7 +69,8 @@ AppAsset::register($this);
             
             
             ) : "",
-
+            // Shoping card
+            !Yii::$app->user->isGuest ? ['label' => 'Cart '.$cart, 'url' => ['/site/cart']] : "",
             //
             Yii::$app->user->isGuest ? (
                 ['label' => 'Login', 'url' => ['/site/login']]
@@ -94,7 +103,7 @@ AppAsset::register($this);
 
 <footer class="footer mt-auto py-3 text-muted">
     <div class="container">
-        <p class="float-left">&copy; My Company <?= date('Y') ?></p>
+        <p class="float-left">&copy; Strode <?= date('Y') ?></p>
         <p class="float-right"><?= Yii::powered() ?></p>
     </div>
 </footer>
